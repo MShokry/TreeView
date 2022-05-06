@@ -1,0 +1,35 @@
+{
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "cwd": "babelrc",
+        "root": [
+          "./src"
+        ],
+        "extensions": [
+          ".js",
+          ".ios.js",
+          ".android.js"
+        ],
+        "alias": {
+          "_assets/*": "./src/assets/*",
+          "_components": "./src/components",
+          "_navigations": "./src/navigations",
+          "_containers/*": "./src/containers/*",
+          "_utils": "./src/utils",
+          "_api": "./src/api"
+        }
+      }
+    ]
+  ],
+  "env": {
+    "development": {
+      "compact": false
+    },
+    "production": {
+      // "plugins": ["transform-remove-console"]
+    }
+  },
+  "compact": false
+}
