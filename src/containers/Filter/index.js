@@ -6,11 +6,9 @@ import {getChildsNames, getNames, getSelected, onClear, onSelect, onUnSelect} fr
 import Tree from 'components/Tree';
 import {styles} from './style';
 
-import {products} from 'api/products';
-
 let selectItem = [];
 
-export default function Filter({textField = 'name', childField = 'childs'}) {
+export default function Filter({products, textField = 'name', childField = 'childs'}) {
   // const [listData] = useState(JSON.parse(JSON.stringify(products))); // if lodash not installed
   const [listData] = useState(_.cloneDeep(products));
   const [timeStamp, setTimeStamp] = useState(Math.random());
@@ -73,7 +71,7 @@ export default function Filter({textField = 'name', childField = 'childs'}) {
       <View style={{height: '95%'}}>
         <Tree onItemPressed={onItemPressed} listData={listData} />
       </View>
-      <ScrollView horizontal style={{height: '4%'}}>
+      <ScrollView horizontal style={{height: '4%', paddingHorizontal: 4, backgroundColor: '#fff'}}>
         {!!selected && _renderSelected()}
       </ScrollView>
     </View>
