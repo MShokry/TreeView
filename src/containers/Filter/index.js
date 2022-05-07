@@ -19,11 +19,13 @@ export default function Filter({products}) {
 
   const onSelect = (item, level) => {
     item.selected = true;
+    item?.[childField] && item[childField].map(child => onSelect(child));
     reload();
   };
 
   const onUnSelect = (item, level) => {
     item.selected = false;
+    item?.[childField] && item[childField].map(child => onUnSelect(child));
     reload();
   };
 
