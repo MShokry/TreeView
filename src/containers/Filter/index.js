@@ -1,35 +1,77 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {FlatList, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
 import {styles} from './style';
 
 import _ from 'lodash';
 
-const textField = 'name';
 const checkSize = 26;
-const childField = 'childs';
+let selectItem = [];
 
-export default function Filter({products}) {
+export default function Filter({products, setSelect = () => {}, textField = 'name', childField = 'childs'}) {
   // const [listData] = useState(JSON.parse(JSON.stringify(products))); // if lodash not installed
   const [listData] = useState(_.cloneDeep(products));
   const [timeStamp, setTimeStamp] = useState(Math.random());
 
-  const reload = () => {
-    setTimeStamp(Math.random());
+  const clearAll = () => {
+    onClear(listData);
   };
 
-  const onSelect = (item, level) => {
+  const onClear = items => {
+    items.map(item => {
+      item.selected = false;
+      if (item[childField]) {
+        onClear(item[childField]);
+      }
+    });
+    reload();
+  };
+
+  const reload = () => {
+    setTimeStamp(Math.random());
+    selectItem = [];
+    getSelected(listData);
+  };
+
+  const getSelected = items => {
+    items?.forEach(child => {
+      if (child?.selected) {
+        selectItem.push(child);
+      } else {
+        child?.[childField] && getSelected(child[childField]);
+      }
+    });
+  };
+
+  const onSelect = item => {
     item.selected = true;
     item?.[childField] && item[childField].map(child => onSelect(child));
     item?.parent && refrehParent(item.parent);
     reload();
   };
 
-  const onUnSelect = (item, level) => {
+  const onUnSelect = item => {
     item.selected = false;
     item?.[childField] && item[childField].map(child => onUnSelect(child));
     item?.parent && refrehParent(item.parent);
     reload();
   };
+
+  useEffect(() => {
+    if (!!!selectItem) {
+      setSelect([]);
+      return;
+    }
+    const selectedItem = _.cloneDeep(selectItem).map(e => {
+      e.isParent = !!e?.[childField];
+      e.parentName = e.parent?.name;
+      delete e.parent;
+      delete e?.[childField];
+      delete e.show;
+      delete e.tick;
+      return e;
+    });
+    setSelect(selectedItem);
+  }, [selectItem]);
 
   const showChild = item => {
     item.show = !item.show;
@@ -69,7 +111,7 @@ export default function Filter({products}) {
     return (
       <View style={[styles.item, {marginLeft: checkSize}]} key={item.id}>
         <View style={styles.rowItem}>
-          {childs && childs.length > 0 ? (
+          {childs?.length > 0 ? (
             <TouchableOpacity onPress={() => showChild(item)}>
               <Text style={styles.name}>{item.show ? '-' : '+'}</Text>
             </TouchableOpacity>
@@ -88,15 +130,14 @@ export default function Filter({products}) {
           </TouchableOpacity>
         </View>
 
-        {item.show && (
+        {item?.show && (
           <View>
-            {childs &&
-              childs.map((data, index) => {
-                if (!data.parent) {
-                  data.parent = item;
-                }
-                return renderList(data, data[childField], level + 1);
-              })}
+            {childs?.map((data, index) => {
+              if (!data.parent) {
+                data.parent = item;
+              }
+              return renderList(data, data[childField], level + 1);
+            })}
           </View>
         )}
       </View>
