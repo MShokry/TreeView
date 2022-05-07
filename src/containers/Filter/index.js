@@ -2,6 +2,10 @@ import React, {useState, useEffect} from 'react';
 import {FlatList, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
 import {styles} from './style';
 
+import CHECK from 'assets/svg/icon-checklist.svg';
+import UNCHECK from 'assets/svg/uncheck.svg';
+import ARROW from 'assets/svg/arrow.svg';
+
 import _ from 'lodash';
 
 const checkSize = 26;
@@ -112,21 +116,22 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
       <View style={[styles.item, {marginLeft: checkSize}]} key={item.id}>
         <View style={styles.rowItem}>
           {childs?.length > 0 ? (
-            <TouchableOpacity onPress={() => showChild(item)}>
-              <Text style={styles.name}>{item.show ? '-' : '+'}</Text>
+            <TouchableOpacity style={[styles.buttonShow]} onPress={() => showChild(item)}>
+              {item.show ? <ARROW style={styles.arrowDown} /> : <ARROW style={styles.arrowClose} />}
             </TouchableOpacity>
           ) : (
             <Text style={{width: checkSize}}>{`  `}</Text>
           )}
-          <TouchableOpacity style={{flex: 1}} onPress={() => onItemPressed(item)}>
-            <View style={styles.center}>
-              <Text style={[styles.name, item.selected ? {color: 'red'} : {}]} numberOfLines={3}>
-                {item[textField]}
-              </Text>
+          <TouchableOpacity style={{flex: 1, flexDirection: 'row'}} onPress={() => onItemPressed(item)}>
+            {item.selected ? <CHECK style={{width: checkSize}} /> : <UNCHECK style={{width: checkSize}} />}
+            <View>
+              <View style={styles.center}>
+                <Text style={[styles.name]} numberOfLines={3}>
+                  {item[textField]}
+                </Text>
+              </View>
+              <Text style={[styles.subName]}>We have {item.devices}+ devices</Text>
             </View>
-            <Text>
-              {'   '}We have {item.devices}+ devices
-            </Text>
           </TouchableOpacity>
         </View>
 
