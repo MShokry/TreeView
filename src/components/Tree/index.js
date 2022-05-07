@@ -23,8 +23,6 @@ export default function Tree({
 }) {
   const [timeStamp, setTimeStamp] = useState(Math.random());
 
-
-
   const reload = () => {
     setTimeStamp(Math.random());
     selectItem = [];

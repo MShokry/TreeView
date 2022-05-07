@@ -29,6 +29,10 @@ Asuming the data is ready for tree processing
 */
 
 // using fakerjs to creat prodcuts
+// const CAT = 2;
+// const BRAND = 2;
+// const MODEL = 2;
+// const VAR = 2;
 const CAT = Math.floor(Math.random() * 15) + 1;
 const BRAND = Math.floor(Math.random() * 10) + 1;
 const MODEL = Math.floor(Math.random() * 10) + 1;

@@ -48,3 +48,18 @@ export const getNames = (selected, textField = 'name') => {
 
   return categories;
 };
+
+export const getSelected = (items, childField = 'childs') => {
+  let selectItem = [];
+  const getAll = item => {
+    item?.forEach(child => {
+      if (child?.selected) {
+        selectItem.push(child);
+      } else {
+        child?.[childField] && getAll(child[childField]);
+      }
+    });
+  };
+  getAll(items);
+  return selectItem;
+};

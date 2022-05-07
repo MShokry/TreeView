@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {View, ScrollView, Text} from 'react-native';
 
 import _ from 'lodash';
-import {getChildsNames, getNames, onClear, onSelect, onUnSelect} from 'utils/treeUtils';
+import {getChildsNames, getNames, getSelected, onClear, onSelect, onUnSelect} from 'utils/treeUtils';
 import Tree from 'components/Tree';
 import {styles} from './style';
 
@@ -23,18 +23,7 @@ export default function Filter({textField = 'name', childField = 'childs'}) {
 
   const reload = () => {
     setTimeStamp(Math.random());
-    selectItem = [];
-    getSelected(listData);
-  };
-
-  const getSelected = items => {
-    items?.forEach(child => {
-      if (child?.selected) {
-        selectItem.push(child);
-      } else {
-        child?.[childField] && getSelected(child[childField]);
-      }
-    });
+    selectItem = getSelected(listData);
   };
 
   useEffect(() => {
