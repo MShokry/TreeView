@@ -20,18 +20,32 @@ export default function Filter({products}) {
   const onSelect = (item, level) => {
     item.selected = true;
     item?.[childField] && item[childField].map(child => onSelect(child));
+    item?.parent && refrehParent(item.parent);
     reload();
   };
 
   const onUnSelect = (item, level) => {
     item.selected = false;
     item?.[childField] && item[childField].map(child => onUnSelect(child));
+    item?.parent && refrehParent(item.parent);
     reload();
   };
 
   const showChild = item => {
     item.show = !item.show;
     reload();
+  };
+
+  const refrehParent = item => {
+    if (item?.[childField]) {
+      const notSelected = item[childField].filter(child => !child.selected);
+      if (notSelected.length === 0) {
+        item.selected = true;
+      } else {
+        item.selected = false;
+      }
+      item?.parent && refrehParent(item.parent);
+    }
   };
 
   const onItemPressed = item => {
@@ -78,6 +92,9 @@ export default function Filter({products}) {
           <View>
             {childs &&
               childs.map((data, index) => {
+                if (!data.parent) {
+                  data.parent = item;
+                }
                 return renderList(data, data[childField], level + 1);
               })}
           </View>
