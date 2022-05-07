@@ -7,6 +7,7 @@ import UNCHECK from 'assets/svg/uncheck.svg';
 import ARROW from 'assets/svg/arrow.svg';
 
 import _ from 'lodash';
+import {onClear, onSelect, onUnSelect} from 'utils/treeUtils';
 
 const checkSize = 26;
 let selectItem = [];
@@ -18,22 +19,13 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
 
   const clearAll = () => {
     onClear(listData);
-  };
-
-  const onClear = items => {
-    items.map(item => {
-      item.selected = false;
-      if (item[childField]) {
-        onClear(item[childField]);
-      }
-    });
     reload();
   };
 
   const reload = () => {
     setTimeStamp(Math.random());
     selectItem = [];
-    getSelected(listData);
+    getSelected(listData, selectItem, childField);
   };
 
   const getSelected = items => {
@@ -44,20 +36,6 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
         child?.[childField] && getSelected(child[childField]);
       }
     });
-  };
-
-  const onSelect = item => {
-    item.selected = true;
-    item?.[childField] && item[childField].map(child => onSelect(child));
-    item?.parent && refrehParent(item.parent);
-    reload();
-  };
-
-  const onUnSelect = item => {
-    item.selected = false;
-    item?.[childField] && item[childField].map(child => onUnSelect(child));
-    item?.parent && refrehParent(item.parent);
-    reload();
   };
 
   useEffect(() => {
@@ -82,25 +60,14 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
     reload();
   };
 
-  const refrehParent = item => {
-    if (item?.[childField]) {
-      const notSelected = item[childField].filter(child => !child.selected);
-      if (notSelected.length === 0) {
-        item.selected = true;
-      } else {
-        item.selected = false;
-      }
-      item?.parent && refrehParent(item.parent);
-    }
-  };
-
   const onItemPressed = item => {
     const p1 = performance.now();
     if (!item.selected) {
-      onSelect(item);
+      onSelect(item, childField);
     } else {
-      onUnSelect(item);
+      onUnSelect(item, childField);
     }
+    reload();
     const p2 = performance.now();
     console.log(`Call to onItemPressed took ${p2 - p1} milliseconds.`);
   };
@@ -124,17 +91,16 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
           )}
           <TouchableOpacity style={{flex: 1, flexDirection: 'row'}} onPress={() => onItemPressed(item)}>
             {item.selected ? <CHECK style={{width: checkSize}} /> : <UNCHECK style={{width: checkSize}} />}
-            <View>
+            <View style={{flex: 1}}>
               <View style={styles.center}>
                 <Text style={[styles.name]} numberOfLines={3}>
                   {item[textField]}
                 </Text>
               </View>
-              <Text style={[styles.subName]}>We have {item.devices}+ devices</Text>
+              <Text style={[styles.subName]}>{item.devices}+ devices</Text>
             </View>
           </TouchableOpacity>
         </View>
-
         {item?.show && (
           <View>
             {childs?.map((data, index) => {

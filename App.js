@@ -32,7 +32,7 @@ export default function index() {
         key={`${idx}`}
         style={{
           backgroundColor: '#ccc',
-          paddingHorizontal: 5,
+          paddingHorizontal: 10,
           marginHorizontal: 5,
           borderRadius: 20,
           alignItems: 'center',

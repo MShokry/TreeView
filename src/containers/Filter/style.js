@@ -22,7 +22,6 @@ export const styles = StyleSheet.create({
   },
   subName: {
     fontSize: 12,
-    flex: 1,
     marginHorizontal: 8,
   },
   arrowDown: {
