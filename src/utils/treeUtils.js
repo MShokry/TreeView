@@ -1,4 +1,3 @@
- 
 export const refrehParent = (item, childField = 'childs') => {
   if (item?.[childField]) {
     const notSelected = item[childField].filter(child => !child.selected);
@@ -30,4 +29,22 @@ export const onClear = (items, childField = 'childs') => {
       onClear(item[childField]);
     }
   });
+};
+
+export const getChildsNames = (item, textField = 'name') => {
+  return (item?.map(e => e[textField]) || []).join(', ');
+};
+
+export const getNames = (selected, textField = 'name') => {
+  const categories =
+    selected.reduce((acc, item) => {
+      if (item.isParent) {
+        acc[item[textField]] ??= {...item};
+      } else {
+        (acc[item.parentName] ??= {isParent: false, data: []}).data.push({...item});
+      }
+      return acc;
+    }, {}) || [];
+
+  return categories;
 };

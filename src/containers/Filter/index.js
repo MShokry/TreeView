@@ -1,21 +1,20 @@
 import React, {useState, useEffect} from 'react';
-import {FlatList, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
-import {styles} from './style';
-
-import CHECK from 'assets/svg/icon-checklist.svg';
-import UNCHECK from 'assets/svg/uncheck.svg';
-import ARROW from 'assets/svg/arrow.svg';
+import {View, ScrollView, Text} from 'react-native';
 
 import _ from 'lodash';
-import {onClear, onSelect, onUnSelect} from 'utils/treeUtils';
+import {getChildsNames, getNames, onClear, onSelect, onUnSelect} from 'utils/treeUtils';
+import Tree from 'components/Tree';
+import {styles} from './style';
 
-const checkSize = 26;
+import {products} from 'api/products';
+
 let selectItem = [];
 
-export default function Filter({products, setSelect = () => {}, textField = 'name', childField = 'childs'}) {
+export default function Filter({textField = 'name', childField = 'childs'}) {
   // const [listData] = useState(JSON.parse(JSON.stringify(products))); // if lodash not installed
   const [listData] = useState(_.cloneDeep(products));
   const [timeStamp, setTimeStamp] = useState(Math.random());
+  const [selected, setSelected] = useState([]);
 
   const clearAll = () => {
     onClear(listData);
@@ -25,7 +24,7 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
   const reload = () => {
     setTimeStamp(Math.random());
     selectItem = [];
-    getSelected(listData, selectItem, childField);
+    getSelected(listData);
   };
 
   const getSelected = items => {
@@ -40,7 +39,7 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
 
   useEffect(() => {
     if (!!!selectItem) {
-      setSelect([]);
+      setSelected([]);
       return;
     }
     const selectedItem = _.cloneDeep(selectItem).map(e => {
@@ -52,13 +51,8 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
       delete e.tick;
       return e;
     });
-    setSelect(selectedItem);
+    setSelected(selectedItem);
   }, [selectItem]);
-
-  const showChild = item => {
-    item.show = !item.show;
-    reload();
-  };
 
   const onItemPressed = item => {
     const p1 = performance.now();
@@ -72,61 +66,27 @@ export default function Filter({products, setSelect = () => {}, textField = 'nam
     console.log(`Call to onItemPressed took ${p2 - p1} milliseconds.`);
   };
 
-  const renderList = (item, childs, level) => {
-    if (!item.selected) {
-      item.selected = false;
+  const _renderSelected = () => {
+    if (!selected.length) {
+      return null;
     }
-    if (!item.show) {
-      item.show = false;
-    }
-    return (
-      <View style={[styles.item, {marginLeft: checkSize}]} key={item.id}>
-        <View style={styles.rowItem}>
-          {childs?.length > 0 ? (
-            <TouchableOpacity style={[styles.buttonShow]} onPress={() => showChild(item)}>
-              {item.show ? <ARROW style={styles.arrowDown} /> : <ARROW style={styles.arrowClose} />}
-            </TouchableOpacity>
-          ) : (
-            <Text style={{width: checkSize}}>{`  `}</Text>
-          )}
-          <TouchableOpacity style={{flex: 1, flexDirection: 'row'}} onPress={() => onItemPressed(item)}>
-            {item.selected ? <CHECK style={{width: checkSize}} /> : <UNCHECK style={{width: checkSize}} />}
-            <View style={{flex: 1}}>
-              <View style={styles.center}>
-                <Text style={[styles.name]} numberOfLines={3}>
-                  {item[textField]}
-                </Text>
-              </View>
-              <Text style={[styles.subName]}>{item.devices}+ devices</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-        {item?.show && (
-          <View>
-            {childs?.map((data, index) => {
-              if (!data.parent) {
-                data.parent = item;
-              }
-              return renderList(data, data[childField], level + 1);
-            })}
-          </View>
-        )}
+    const c = Object.entries(getNames(selected));
+    return c.map(([key, value], idx) => (
+      <View key={`${idx}`} style={styles.tags}>
+        {/* <Text>test</Text> */}
+        <Text>{!value.data ? `all ${key} devices` : `${key} ${getChildsNames(value.data)}`}</Text>
       </View>
-    );
+    ));
   };
 
   return (
     <View>
-      <SafeAreaView>
-        <FlatList
-          data={listData}
-          renderItem={({item, index}) => renderList(item, item[childField], 0)}
-          keyExtractor={(item, index) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          extraData={timeStamp}
-          ListFooterComponentStyle={{paddingBottom: 40}}
-        />
-      </SafeAreaView>
+      <View style={{height: '95%'}}>
+        <Tree onItemPressed={onItemPressed} listData={listData} />
+      </View>
+      <ScrollView horizontal style={{height: '4%'}}>
+        {!!selected && _renderSelected()}
+      </ScrollView>
     </View>
   );
 }
